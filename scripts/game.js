@@ -20,6 +20,9 @@ const damagingBallColor = "#9500DD";
 let currentBallColor = defaultBallColor;
 let changeBallColorTimer = 0.1;
 
+let boostCoeff = 1.5;
+let speedBoostTimer = 0;
+
 // paddle related
 let paddleHeight = 10;
 let paddleWidth = 75;
@@ -81,6 +84,10 @@ function updateSpeed(deltaX, deltaY)
     } else if ( y + deltaY > canvas.height - ballRadius) {
         if (x > paddleX && x < paddleX + paddleWidth) {
             dy = -dy;
+
+            dx *= boostCoeff;
+            dy *= boostCoeff;
+            speedBoostTimer = 0.1;
         } else {
             handleFailedToCatch();
         }
@@ -213,6 +220,14 @@ function draw(tFrame)
     }
 
     collisionDetection();
+
+    if (speedBoostTimer > 0) {
+        speedBoostTimer -= dt;
+        if (speedBoostTimer <= 0) {
+            dx /= boostCoeff;
+            dy /= boostCoeff;
+        }
+    }
 
     let deltaX = dx * dt;
     let deltaY = dy * dt;
