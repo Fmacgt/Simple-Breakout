@@ -15,6 +15,14 @@ const ballSpeed = Math.sqrt(canvas.width * canvas.width + canvas.height * canvas
 let dx = ballSpeed * 0.707;
 let dy = ballSpeed * -0.707;
 
+const defaultBallColor = "#0095DD";
+const damagingBallColor = "#9500DD";
+let currentBallColor = defaultBallColor;
+let changeBallColorTimer = 0.1;
+
+let boostCoeff = 1.5;
+let speedBoostTimer = 0;
+
 // paddle related
 let paddleHeight = 10;
 let paddleWidth = 75;
@@ -60,7 +68,7 @@ function drawBall()
 {
     ctx.beginPath();
     ctx.arc(x, y, ballRadius, 0, Math.PI * 2, false);
-    ctx.fillStyle = "#0095DD";
+    ctx.fillStyle = currentBallColor;
     ctx.fill();
     ctx.closePath();
 }
@@ -76,6 +84,10 @@ function updateSpeed(deltaX, deltaY)
     } else if ( y + deltaY > canvas.height - ballRadius) {
         if (x > paddleX && x < paddleX + paddleWidth) {
             dy = -dy;
+
+            dx *= boostCoeff;
+            dy *= boostCoeff;
+            speedBoostTimer = 0.1;
         } else {
             handleFailedToCatch();
         }
@@ -161,6 +173,9 @@ function collisionDetection()
                     dy = -dy;
                     b.status = 0;
 
+                    currentBallColor = damagingBallColor;
+                    changeBallColorTimer = 0.1;
+
                     score++;
                     if (clearedAllBricks()) {
                         alert("YOU WIN, CONGRATULATIONS!");
@@ -199,7 +214,20 @@ function draw(tFrame)
     drawScore();
     drawLives();
 
+    changeBallColorTimer -= dt;
+    if (changeBallColorTimer <= 0) {
+        currentBallColor = defaultBallColor;
+    }
+
     collisionDetection();
+
+    if (speedBoostTimer > 0) {
+        speedBoostTimer -= dt;
+        if (speedBoostTimer <= 0) {
+            dx /= boostCoeff;
+            dy /= boostCoeff;
+        }
+    }
 
     let deltaX = dx * dt;
     let deltaY = dy * dt;
